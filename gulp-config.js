@@ -8,7 +8,7 @@ module.exports = function () {
     packagePath: instanceRoot + "\\App_Data\\packages",
     solutionName: "Habitat",
     buildConfiguration: "Debug",
-    buildToolsVersion: 15.0,
+    buildToolsVersion: "auto",
     buildMaxCpuCount: 0,
     buildVerbosity: "minimal",
     buildPlatform: "Any CPU",
