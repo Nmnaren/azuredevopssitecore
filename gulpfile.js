@@ -522,3 +522,54 @@ gulp.task("Package-Generate",
             "Package-Clean",
             callback);
     });
+    
+    /*****************************
+  CI Publish
+  Credits to James - Inspired from : https://www.jameshirka.com/2016/10/sitecore-habitat-deployment/
+*****************************/
+
+gulp.task("CI-Build", function (callback) {
+    runSequence(
+        "CI-Clean",
+        "CI-Publish",
+        "CI-Prepare-Package-Files",
+        "CI-Copy-Items",
+        callback);
+});
+
+gulp.task("CI-Publish", function (callback) {
+    config.websiteRoot = path.resolve("./Output");
+    config.buildConfiguration = "Release";
+    fs.mkdirSync(config.websiteRoot);
+    runSequence(
+        "Build-Solution",
+        "Publish-Foundation-Projects",
+        "Publish-Feature-Projects",
+        "Publish-Project-Projects", callback);
+});
+
+gulp.task("CI-Clean", function (callback) {
+    rimrafDir.sync(path.resolve("./Output"));
+    callback();
+});
+
+
+gulp.task("CI-Copy-Items", function () {
+    return gulp.src("./src/**/serialization/**/*.yml")
+        .pipe(gulp.dest('./Output/Data/unicorn/'));
+});
+
+
+gulp.task("CI-Prepare-Package-Files", function (callback) {
+    var excludeList = [
+        config.websiteRoot + "\\bin\\{Sitecore,Lucene,Newtonsoft,System,Microsoft.Web.Infrastructure}*dll",
+        config.websiteRoot + "\\compilerconfig.json.defaults",
+        config.websiteRoot + "\\packages.config",
+        config.websiteRoot + "\\App_Config\\Include\\{Feature,Foundation,Project}\\z.*DevSettings.config",
+        "!" + config.websiteRoot + "\\bin\\Sitecore.Support*dll",
+        "!" + config.websiteRoot + "\\bin\\Sitecore.{Feature,Foundation,Habitat,Demo,Common}*dll"
+    ];
+    console.log(excludeList);
+
+    return gulp.src(excludeList, { read: false }).pipe(rimraf({ force: true }));
+});
